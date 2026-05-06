@@ -1,24 +1,436 @@
+
+
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>pagina nueva</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerFit Peru | Elite Performance</title>
+    <style>
+        :root {
+            --primary: #e6fb04; 
+            --secondary: #1a1a1a;
+            --bg-dark: #0f0f0f;
+            --text-light: #ffffff;
+            --danger: #ff3e3e;
+            --overlay: rgba(0, 0, 0, 0.9);
+        }
 
+        body {
+            font-family: 'Arial Black', sans-serif;
+            margin: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+            min-width: 1200px;
+        }
+
+        /* --- HEADER --- */
+        header {
+            background: rgba(0,0,0,0.95);
+            padding: 0 5%;
+            position: fixed;
+            width: 90%;
+            height: 90px;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--primary);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo { font-size: 1.8rem; font-weight: 900; color: var(--primary); text-decoration: none; cursor: pointer; }
+        .logo span { color: white; }
+        
+        nav ul { display: flex; list-style: none; padding: 0; margin: 0; height: 90px; align-items: center; }
+        .nav-item-container { position: relative; height: 100%; display: flex; align-items: center; }
+        .menu-item { padding: 0 15px; cursor: pointer; font-size: 0.75rem; text-transform: uppercase; color: white; transition: 0.3s; height: 100%; display: flex; align-items: center; }
+
+        .dropdown-products {
+            position: absolute; top: 90px; left: 0; width: 200px;
+            background: var(--secondary); border: 2px solid var(--primary); border-top: none;
+            display: flex; flex-direction: column; visibility: hidden; opacity: 0; transition: 0.3s ease;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5); border-radius: 0 0 10px 10px;
+        }
+
+        .nav-item-container:hover .dropdown-products { visibility: visible; opacity: 1; }
+        .dropdown-link { padding: 15px 20px; color: white; text-decoration: none; font-size: 0.75rem; text-transform: uppercase; border-bottom: 1px solid #333; transition: 0.3s; cursor: pointer; }
+        .dropdown-link:hover { background: var(--primary); color: black; padding-left: 25px; }
+
+        .user-actions { display: flex; align-items: center; gap: 20px; }
+        .action-icon { cursor: pointer; font-size: 1.4rem; transition: 0.3s; position: relative; }
+        .action-icon:hover { color: var(--primary); transform: scale(1.1); }
+
+        /* --- VISTAS --- */
+        .page-view { display: none; padding-top: 120px; min-height: 100vh; box-sizing: border-box; }
+        .active-view { display: block; }
+
+        /* --- FLASH SALE --- */
+        .flash-sale-bar { background: var(--danger); color: white; text-align: center; padding: 12px 0; font-size: 0.9rem; letter-spacing: 2px; width: 100%; position: relative; top: 90px; z-index: 900;}
+
+        /* --- HERO --- */
+        .hero {
+            height: 80vh;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.3), var(--bg-dark)), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070');
+            background-size: cover; background-position: center;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .hero h1 { font-size: 7rem; margin: 0; font-style: italic; line-height: 0.8; text-align: center; }
+
+        /* BENTO GRID */
+        .bento-grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, 250px); gap: 20px; padding: 50px 5%; max-width: 1300px; margin: auto; }
+        .bento-item { background: var(--secondary); border-radius: 20px; position: relative; overflow: hidden; border: 1px solid #333; transition: 0.4s; cursor: pointer; display: flex; align-items: flex-end; padding: 25px; }
+        .bento-item:hover { border-color: var(--primary); transform: scale(1.02); }
+        .bento-item.large { grid-column: span 2; grid-row: span 2; }
+        .bento-item.wide { grid-column: span 2; }
+        .bento-proteina { background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.9)), url('https://images.unsplash.com/photo-1593079831268-3381b0db4a77?q=80&w=1000'); background-size: cover; }
+        .bento-creatina { background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.9)), url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=1000'); background-size: cover; }
+
+        /* PRODUCT CARDS */
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; padding: 40px 5%; }
+        .product-card { background: var(--secondary); border-radius: 15px; padding: 20px; text-align: center; border: 1px solid #333; transition: 0.3s; }
+        .product-card img { width: 100%; height: 220px; object-fit: contain; margin-bottom: 15px; background: white; border-radius: 10px; padding: 10px; box-sizing: border-box; }
+        .btn-buy { background: var(--primary); color: black; border: none; padding: 12px; width: 100%; font-weight: bold; text-transform: uppercase; cursor: pointer; border-radius: 5px; transition: 0.3s; }
+        .btn-buy:hover { background: #fff; }
+
+        /* UBICACIÓN VIEW */
+        .location-container { max-width: 1000px; margin: auto; padding: 40px 5%; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+        .info-card { background: var(--secondary); padding: 40px; border-radius: 20px; border-left: 5px solid var(--primary); }
+        .info-item { margin-bottom: 25px; }
+        .info-item h3 { color: var(--primary); font-size: 0.9rem; letter-spacing: 2px; margin-bottom: 5px; }
+        .info-item p { font-size: 1.2rem; margin: 0; }
+        .map-box { border-radius: 20px; overflow: hidden; border: 2px solid var(--primary); height: 400px; }
+
+        /* CARRITO PANEL */
+        #cart-panel { position: fixed; right: -450px; top: 0; width: 400px; height: 100%; background: #111; z-index: 3000; transition: 0.4s; padding: 30px; border-left: 2px solid var(--primary); box-sizing: border-box; display: flex; flex-direction: column; }
+        #cart-panel.active { right: 0; }
+        #count { position: absolute; top: -10px; right: -10px; background: var(--primary); color: #000; font-size: 0.7rem; padding: 2px 6px; border-radius: 50%; font-weight: bold; }
+        #cart-list { flex: 1; overflow-y: auto; }
+        .qty-controls { display: flex; align-items: center; gap: 10px; background: #222; padding: 5px; border-radius: 5px; }
+        .btn-qty { background: var(--primary); border: none; width: 22px; height: 22px; cursor: pointer; font-weight: bold; }
+
+        /* CHECKOUT */
+        .checkout-container { display: grid; grid-template-columns: 1fr 400px; gap: 30px; padding: 40px 5%; max-width: 1200px; margin: auto; }
+        .checkout-box { background: var(--secondary); padding: 30px; border-radius: 15px; border: 1px solid #333; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; color: var(--primary); font-size: 0.8rem; margin-bottom: 5px; }
+        .form-group input { width: 100%; padding: 10px; background: #000; border: 1px solid #333; color: white; border-radius: 5px; }
+
+        /* MODAL AUTH */
+        #auth-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--overlay); z-index: 5000; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
+        .auth-card { background: var(--secondary); padding: 40px; border-radius: 20px; border: 2px solid var(--primary); width: 350px; text-align: center; }
+
+        /* iBOT */
+        #ibot-container { position: fixed; bottom: 25px; right: 25px; z-index: 9999; display: flex; flex-direction: column; align-items: flex-end; }
+        #ibot-window { width: 320px; height: 450px; background: var(--secondary); border: 2px solid var(--primary); border-radius: 15px; display: none; flex-direction: column; overflow: hidden; margin-bottom: 15px; }
+        .ibot-header { background: var(--primary); color: black; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; }
+        .ibot-messages { flex: 1; padding: 15px; overflow-y: auto; background: #111; display: flex; flex-direction: column; gap: 10px; }
+        .chat-bubble { padding: 10px; border-radius: 10px; font-size: 0.85rem; }
+        .chat-bubble.bot { background: #222; align-self: flex-start; border-left: 3px solid var(--primary); }
+        .chat-bubble.user { background: var(--primary); color: black; align-self: flex-end; }
+        #ibot-toggle { width: 60px; height: 60px; background: var(--primary); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 1.8rem; }
+
+        footer { background: #000; padding: 60px 5%; text-align: center; border-top: 1px solid #333; color: #555; }
+    </style>
 </head>
-
 <body>
-    
-<div>
-<h1>hola mundo y universo
-</h1>
 
-<p>esto es un intento de pagina web de certus</p>
+    <header>
+        <a class="logo" onclick="showView('home-view')">POWER<span>FIT</span></a>
+        <nav>
+            <ul>
+                <li><a class="menu-item" onclick="showView('home-view')">Inicio</a></li>
+                <li class="nav-item-container">
+                    <a class="menu-item">Productos ▾</a>
+                    <div class="dropdown-products">
+                        <a class="dropdown-link" onclick="showView('view-proteinas')">Proteínas</a>
+                        <a class="dropdown-link" onclick="showView('view-creatinas')">Creatinas</a>
+                    </div>
+                </li>
+                <li><a class="menu-item" onclick="showView('about-view')">Nosotros</a></li>
+                <li><a class="menu-item" onclick="showView('location-view')">Encuéntranos</a></li>
+            </ul>
+        </nav>
+        <div class="user-actions">
+            <div class="action-icon" onclick="toggleAuthModal()">👤</div>
+            <div class="action-icon" onclick="toggleCart()">🛒 <span id="count">0</span></div>
+        </div>
+    </header>
 
-</div>
+    <div class="flash-sale-bar">⚡ OFERTA RELÁMPAGO FINALIZA EN: <span id="timer">08:00:00</span> ⚡</div>
 
-<p>todo va bien hasta ahora </p>
+    <!-- VISTA INICIO -->
+    <main id="home-view" class="page-view active-view" style="padding-top: 90px;">
+        <section class="hero">
+            <p style="color:var(--primary); letter-spacing: 5px;">STAY HUNGRY</p>
+            <h1>UNSTOPPABLE<br>FORCE</h1>
+            <button class="btn-buy" style="width: 250px; margin-top: 30px;" onclick="showView('view-proteinas')">VER CATÁLOGO</button>
+        </section>
 
-<body>
-    
+        <section class="bento-grid">
+            <div class="bento-item large bento-proteina" onclick="showView('view-proteinas')">
+                <h3>WHEY PROTEIN <br> <span style="color:var(--primary); font-size: 0.8rem;">BEST SELLERS</span></h3>
+            </div>
+            <div class="bento-item wide bento-creatina" onclick="showView('view-creatinas')">
+                <h3>STRENGTH <br> <span style="color:var(--primary); font-size: 0.8rem;">CREATINAS</span></h3>
+            </div>
+            <div class="bento-item" style="background: #111;" onclick="showView('location-view')"><h3>TIENDA FÍSICA</h3></div>
+            <div class="bento-item" style="background: var(--primary); color: black;" onclick="showView('view-proteinas')"><h3>OFERTAS TOP</h3></div>
+        </section>
+    </main>
+
+    <!-- VISTA ENCUÉNTRANOS -->
+    <section id="location-view" class="page-view">
+        <h2 style="text-align:center; font-size: 3rem; margin-bottom: 10px;">ENCUÉNTRANOS</h2>
+        <p style="text-align:center; color: var(--primary); margin-bottom: 40px;">VEN POR TU SUPLEMENTACIÓN ELITE</p>
+        
+        <div class="location-container">
+            <div class="info-card">
+                <div class="info-item">
+                    <h3>UBICACIÓN</h3>
+                    <p>Av. Paseo de la República 520, San Isidro</p>
+                </div>
+                <div class="info-item">
+                    <h3>HORARIO DE ATENCIÓN</h3>
+                    <p>Lunes a Sábado: 08:00 AM - 08:00 PM</p>
+                </div>
+                <div class="info-item">
+                    <h3>TELÉFONO DE CONTACTO</h3>
+                    <p style="color: var(--primary); font-weight: bold;">999955555</p>
+                </div>
+                <button class="btn-buy" onclick="window.open('https://wa.me/51999955555')">HABLAR POR WHATSAPP</button>
+            </div>
+
+            <div class="map-box">
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3901.442848981665!2d-77.0322791!3d-12.0818318!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9105c8f53a4e98f7%3A0x9a8421b8c067e2a9!2sAv.%20Paseo%20de%20la%20Rep%C3%BAblica%20520%2C%20Lince%2015046!5e0!3m2!1ses!2spe!4v1714770000000!5m2!1ses!2spe" 
+                    width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy">
+                </iframe>
+            </div>
+        </div>
+    </section>
+
+    <!-- VISTA PRODUCTOS (PROTEINAS) -->
+    <section id="view-proteinas" class="page-view">
+        <h2 style="text-align:center; font-size: 3rem;">PROTEÍNAS</h2>
+        <div class="products-grid">
+            <div class="product-card">
+                <img src="https://m.media-amazon.com/images/I/7162yS39SBL._AC_SL1500_.jpg">
+                <h3>NITROTECH 5LB</h3>
+                <p style="color: var(--primary);">S/ 245.00</p>
+                <button class="btn-buy" onclick="addToCart('Nitrotech 5lb', 245)">Añadir</button>
+            </div>
+            <div class="product-card">
+                <img src="https://m.media-amazon.com/images/I/61SId9T6m5L._AC_SL1500_.jpg">
+                <h3>ISO 100 DYMATIZE</h3>
+                <p style="color: var(--primary);">S/ 310.00</p>
+                <button class="btn-buy" onclick="addToCart('ISO 100 Dymatize', 310)">Añadir</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- VISTA PRODUCTOS (CREATINAS) -->
+    <section id="view-creatinas" class="page-view">
+        <h2 style="text-align:center; font-size: 3rem;">CREATINAS</h2>
+        <div class="products-grid">
+            <div class="product-card">
+                <img src="https://m.media-amazon.com/images/I/61NfIeXmPLL._AC_SL1500_.jpg">
+                <h3>PLATINUM CREATINE</h3>
+                <p style="color: var(--primary);">S/ 95.00</p>
+                <button class="btn-buy" onclick="addToCart('Platinum Creatine', 95)">Añadir</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- VISTA CHECKOUT -->
+    <section id="checkout-view" class="page-view">
+        <div class="checkout-container">
+            <div class="checkout-box">
+                <h2 style="color:var(--primary)">DATOS DE ENVÍO</h2>
+                <div class="form-group"><label>Nombre</label><input type="text" id="c-name"></div>
+                <div class="form-group"><label>Dirección</label><input type="text" id="c-addr"></div>
+                <div class="form-group"><label>Celular</label><input type="tel" id="c-phone"></div>
+                <h3 style="color:var(--primary); margin-top:20px;">PAGO</h3>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-buy" style="background:#222; color:white; border:1px solid #444;" onclick="alert('Pago con Tarjeta Seleccionado')">TARJETA</button>
+                    <button class="btn-buy" style="background:#222; color:white; border:1px solid #444;" onclick="alert('Pago con Yape Seleccionado')">YAPE</button>
+                </div>
+            </div>
+            <div class="checkout-box">
+                <h2 style="color:var(--primary)">RESUMEN</h2>
+                <div id="checkout-list"></div>
+                <hr style="border-color:#333; margin:15px 0;">
+                <div style="display:flex; justify-content:space-between; font-size:1.5rem;">
+                    <span>TOTAL</span>
+                    <span style="color:var(--primary)">S/ <span id="final-total">0.00</span></span>
+                </div>
+                <button class="btn-buy" style="margin-top:20px;" onclick="finishOrder()">FINALIZAR PEDIDO</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- VISTA NOSOTROS -->
+    <section id="about-view" class="page-view">
+        <div style="max-width: 800px; margin: auto; text-align: center;">
+            <h2 style="color:var(--primary)">SOBRE POWERFIT</h2>
+            <p>Somos el distribuidor número 1 de suplementos premium en Lima, Perú. Nuestra misión es brindarte herramientas de calidad para alcanzar tu mejor versión.</p>
+        </div>
+    </section>
+
+    <!-- CARRITO PANEL -->
+    <div id="cart-panel">
+        <h2 style="color:var(--primary)">CARRITO</h2>
+        <div id="cart-items-container"></div>
+        <div style="margin-top:20px; border-top:1px solid #333; padding-top:20px;">
+            <div style="display:flex; justify-content:space-between; font-size:1.2rem; margin-bottom:20px;">
+                <span>Total:</span>
+                <strong style="color:var(--primary)">S/ <span id="cart-total-val">0.00</span></strong>
+            </div>
+            <button class="btn-buy" onclick="goToCheckout()">CONTINUAR COMPRA</button>
+            <button class="btn-buy" style="background:#333; color:white; margin-top:10px;" onclick="toggleCart()">CERRAR</button>
+        </div>
+    </div>
+
+    <!-- MODAL LOGIN -->
+    <div id="auth-modal" onclick="toggleAuthModal()">
+        <div class="auth-card" onclick="event.stopPropagation()">
+            <h2 style="color:var(--primary)">LOGIN</h2>
+            <input type="email" placeholder="Correo" style="width:100%; padding:10px; margin-bottom:10px; background:#000; border:1px solid #333; color:white;">
+            <input type="password" placeholder="Contraseña" style="width:100%; padding:10px; margin-bottom:20px; background:#000; border:1px solid #333; color:white;">
+            <button class="btn-buy" onclick="toggleAuthModal()">INGRESAR</button>
+        </div>
+    </div>
+
+    <!-- iBOT -->
+    <div id="ibot-container">
+        <div id="ibot-window">
+            <div class="ibot-header"><span>🤖 POWER-BOT</span> <span onclick="toggleiBot()" style="cursor:pointer">✕</span></div>
+            <div class="ibot-messages" id="chat-box">
+                <div class="chat-bubble bot">¡Hola! ¿Buscando suplementos o quieres saber nuestra ubicación? 💪</div>
+            </div>
+            <div style="display:flex; padding:10px; background:#000;">
+                <input type="text" id="user-msg" placeholder="Escribe..." style="flex:1; background:#111; border:1px solid #333; color:white; padding:8px;" onkeypress="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()" style="background:var(--primary); border:none; padding:5px 15px;">➔</button>
+            </div>
+        </div>
+        <div id="ibot-toggle" onclick="toggleiBot()">💬</div>
+    </div>
+
+    <footer>
+        <h2 style="color:var(--primary)">POWERFIT PERU</h2>
+        <p>AV. PASEO DE LA REPUBLICA 520, SAN ISIDRO</p>
+        <p style="font-size: 0.7rem; color: #333; margin-top: 40px;">© 2026 POWERFIT PERFORMANCE.</p>
+    </footer>
+
+    <script>
+        let cart = [];
+
+        function showView(id) {
+            document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active-view'));
+            document.getElementById(id).classList.add('active-view');
+            window.scrollTo(0,0);
+        }
+
+        function toggleCart() { document.getElementById('cart-panel').classList.toggle('active'); }
+        function toggleAuthModal() { 
+            const m = document.getElementById('auth-modal');
+            m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function addToCart(name, price) {
+            const item = cart.find(i => i.name === name);
+            if(item) item.qty++;
+            else cart.push({name, price, qty: 1});
+            updateUI();
+        }
+
+        function removeFromCart(name) {
+            const item = cart.find(i => i.name === name);
+            if(item.qty > 1) item.qty--;
+            else cart = cart.filter(i => i.name !== name);
+            updateUI();
+        }
+
+        function updateUI() {
+            const container = document.getElementById('cart-items-container');
+            const checkList = document.getElementById('checkout-list');
+            let total = 0;
+            let count = 0;
+            let html = "";
+
+            cart.forEach(i => {
+                total += (i.price * i.qty);
+                count += i.qty;
+                html += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #222;">
+                        <div><div style="font-size:0.8rem;">${i.name}</div><div style="color:var(--primary);">S/ ${i.price}</div></div>
+                        <div class="qty-controls">
+                            <button class="btn-qty" onclick="removeFromCart('${i.name}')">-</button>
+                            <span>${i.qty}</span>
+                            <button class="btn-qty" onclick="addToCart('${i.name}', ${i.price})">+</button>
+                        </div>
+                    </div>`;
+            });
+
+            document.getElementById('count').innerText = count;
+            document.getElementById('cart-total-val').innerText = total.toFixed(2);
+            document.getElementById('final-total').innerText = total.toFixed(2);
+            container.innerHTML = html || "<p style='text-align:center; color:#444;'>Vacío</p>";
+            if(checkList) checkList.innerHTML = html;
+        }
+
+        function goToCheckout() {
+            if(cart.length === 0) return alert("Carrito vacío");
+            toggleCart();
+            showView('checkout-view');
+        }
+
+        function finishOrder() {
+            const n = document.getElementById('c-name').value;
+            if(!n) return alert("Completa tus datos");
+            alert(`¡Pedido recibido ${n}! Nos contactaremos al número brindado.`);
+            cart = []; updateUI(); showView('home-view');
+        }
+
+        function toggleiBot() {
+            const w = document.getElementById('ibot-window');
+            w.style.display = (w.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('user-msg');
+            const box = document.getElementById('chat-box');
+            if(!input.value) return;
+            box.innerHTML += <div class="chat-bubble user">${input.value}</div>;
+            const m = input.value.toLowerCase();
+            input.value = "";
+            setTimeout(() => {
+                let r = "Te ayudamos en lo que necesites.";
+                if(m.includes("donde") || m.includes("ubicacion")) r = "Estamos en San Isidro, Av. Paseo de la República 520.";
+                if(m.includes("horario")) r = "Atendemos de 8am a 8pm.";
+                box.innerHTML += <div class="chat-bubble bot">${r}</div>;
+                box.scrollTop = box.scrollHeight;
+            }, 600);
+        }
+
+        function startTimer(duration, display) {
+            let timer = duration, h, m, s;
+            setInterval(() => {
+                h = parseInt(timer / 3600, 10);
+                m = parseInt((timer % 3600) / 60, 10);
+                s = parseInt(timer % 60, 10);
+                display.textContent = (h<10?"0"+h:h)+":"+(m<10?"0"+m:m)+":"+(s<10?"0"+s:s);
+                if (--timer < 0) timer = duration;
+            }, 1000);
+        }
+
+        window.onload = () => startTimer(60 * 60 * 8, document.querySelector('#timer'));
+    </script>
+</body>
+</html>
 
 
 
